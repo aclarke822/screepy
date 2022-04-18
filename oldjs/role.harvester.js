@@ -30,7 +30,7 @@ var roleHarvester = {
                 creep.memory.state = "SEEKSOURCE";
             }
         } else {
-            creep.memory.objective = "DEPOSIT"
+            creep.memory.objective = "DEPOSIT";
             creep.memory.state = "SEEKHOME";
         }
     },
@@ -71,7 +71,7 @@ var roleHarvester = {
                 creep.memory.state = "SEEKHOME";
             }
         } else {
-            creep.memory.objective = "HARVEST"
+            creep.memory.objective = "HARVEST";
             creep.memory.state = "SEEKSOURCE";
         }
     },
