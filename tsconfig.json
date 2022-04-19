@@ -1,19 +1,20 @@
 {
+  "extends": "@tsconfig/node17/tsconfig.json",
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
   "compilerOptions": {
-    "module": "esnext",
-    "lib": ["es2021"],
-    "target": "es2021",
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
     "outDir": "dist",
     "baseUrl": "src/",
     "sourceMap": true,
-    "strict": true,
     "experimentalDecorators": true,
     "noImplicitReturns": true,
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false
-  },
-  "exclude": [
-    "node_modules"
-  ]
+  }
 }

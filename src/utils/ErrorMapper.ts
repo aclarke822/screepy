@@ -1,16 +1,38 @@
 import _ from "lodash";
-import { SourceMapConsumer } from "source-map";
+import SourceMap from 'source-map';
+import rawSourceMap = require("../../dist/main.js.map.js");
 
 export class ErrorMapper {
   // Cache consumer
-  private static _consumer: SourceMapConsumer;
+  private static _consumer?: SourceMap.SourceMapConsumer;
 
-  public static get consumer(): SourceMapConsumer {
-    if (this._consumer == null) {
-      new SourceMapConsumer(require("main.js.map")).then(result => { this._consumer = result });
+  public static get consumer(): SourceMap.SourceMapConsumer {
+    const test = async function (consumer: any) {
+      const xSquared = await SourceMapConsumer.with(myRawSourceMap, null, async function (consumer) {
+        // Use `consumer` inside here and don't worry about remembering
+        // to call `destroy`.
+
+        const x = await whatever(consumer);
+        return x * x;
+      });
     }
 
-    return this._consumer;
+
+    if (this._consumer == null) {
+      new SourceMap.SourceMapConsumer(rawSourceMap).then(data => { this._consumer = data as SourceMap.SourceMapConsumer });
+
+      const map = new SourceMap.SourceMapGenerator({
+        file: "main.js.map.js"
+      });
+
+      if (this._consumer !== undefined) {
+        return this._consumer;
+      }
+    } else {
+      return this._consumer;
+    }
+
+    throw ERR_INVALID_ARGS;
   }
 
   // Cache previously mapped traces to improve performance
@@ -88,4 +110,7 @@ export class ErrorMapper {
       }
     };
   }
+
+
 }
+
