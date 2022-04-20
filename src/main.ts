@@ -1,5 +1,5 @@
-import _ from "lodash";
-import * as  ErrorMapper from "utils/ErrorMapper";
+//screepy 2.0.0
+import { ErrorMapper } from "utils/ErrorMapper";
 
 declare global {
     interface Memory {
@@ -18,7 +18,7 @@ declare global {
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
     console.log(`Current game tick is ${Game.time}`);
-    console.log(_.prototype)
+
     // Automatically delete memory of missing creeps
     Object.keys(Memory.creeps).forEach((name: string) => {
         if (!(name in Game.creeps)) {

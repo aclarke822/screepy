@@ -1,14 +1,15 @@
 {
-  "extends": "@tsconfig/node17/tsconfig.json",
+  "extends": "@tsconfig/recommended",
   "include": [
-    "src/**/*.ts"
+    "src"
   ],
   "exclude": [
-    "node_modules",
-    "dist"
+    "/dist/",
+    "node_modules/",
+    "oldjs",
+    "randomSnips"
   ],
   "compilerOptions": {
-    "moduleResolution": "node",
     "outDir": "dist",
     "baseUrl": "src/",
     "sourceMap": true,

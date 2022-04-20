@@ -1,38 +1,20 @@
 import _ from "lodash";
 import SourceMap from 'source-map';
-import rawSourceMap = require("../../dist/main.js.map.js");
 
 export class ErrorMapper {
   // Cache consumer
-  private static _consumer?: SourceMap.SourceMapConsumer;
+  private static _consumer: SourceMap.SourceMapConsumer;
 
-  public static get consumer(): SourceMap.SourceMapConsumer {
-    const test = async function (consumer: any) {
-      const xSquared = await SourceMapConsumer.with(myRawSourceMap, null, async function (consumer) {
-        // Use `consumer` inside here and don't worry about remembering
-        // to call `destroy`.
-
-        const x = await whatever(consumer);
-        return x * x;
-      });
-    }
-
-
+  public static get getConsumer(): SourceMap.SourceMapConsumer {
     if (this._consumer == null) {
-      new SourceMap.SourceMapConsumer(rawSourceMap).then(data => { this._consumer = data as SourceMap.SourceMapConsumer });
-
-      const map = new SourceMap.SourceMapGenerator({
-        file: "main.js.map.js"
-      });
-
-      if (this._consumer !== undefined) {
-        return this._consumer;
-      }
-    } else {
-      return this._consumer;
+      new SourceMap.SourceMapConsumer(JSON.parse("main.js.map.js")).then(data => { this._consumer = data as SourceMap.SourceMapConsumer });
     }
 
-    throw ERR_INVALID_ARGS;
+    if (this._consumer !== undefined) {
+      return this._consumer;
+    } else {
+      throw TypeError("Source map consumer undefined");
+    }
   }
 
   // Cache previously mapped traces to improve performance
@@ -47,6 +29,7 @@ export class ErrorMapper {
    * @param {Error | string} error The error or original stack trace
    * @returns {string} The source-mapped stack trace
    */
+
   public static sourceMappedStackTrace(error: Error | string): string {
     const stack: string = error instanceof Error ? (error.stack as string) : error;
     if (Object.prototype.hasOwnProperty.call(this.cache, stack)) {
@@ -58,9 +41,10 @@ export class ErrorMapper {
     let match: RegExpExecArray | null;
     let outStack = error.toString();
 
-    while ((match = re.exec(stack))) {
+    if ((match = re.exec(stack))) {
+      //
       if (match[2] === "main") {
-        const pos = this.consumer.originalPositionFor({
+        const pos = this._consumer.originalPositionFor({
           column: parseInt(match[4], 10),
           line: parseInt(match[3], 10)
         });
@@ -79,11 +63,9 @@ export class ErrorMapper {
           }
         } else {
           // no known position
-          break;
         }
       } else {
         // no more parseable lines
-        break;
       }
     }
 
@@ -110,7 +92,6 @@ export class ErrorMapper {
       }
     };
   }
-
 
 }
 
