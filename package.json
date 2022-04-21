@@ -12,8 +12,8 @@
     "./main.js.map.js": "./dist/main.js.map.js"
   },
   "scripts": {
-    "lint": "eslint \"src/**/*.ts\"",
-    "lint-and-fix": "eslint --fix  \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\" \"rollup.config.ts\"",
+    "lint-and-fix": "eslint --fix  \"src/**/*.ts\" \"rollup.config.ts\"",
     "build": "rollup -c",
     "push-main": "rollup -c --environment DEST:main"
   },
