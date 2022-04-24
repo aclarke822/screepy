@@ -7,7 +7,7 @@ export class ErrorMapper {
 
   public static get getConsumer(): SourceMap.SourceMapConsumer {
     if (this._consumer == null) {
-      new SourceMap.SourceMapConsumer(JSON.parse("main.js.map.js")).then(data => { this._consumer = data as SourceMap.SourceMapConsumer });
+      new SourceMap.SourceMapConsumer(JSON.parse("main.js.map.js")).then((data: SourceMap.SourceMapConsumer) => { this._consumer = data});
     }
 
     if (this._consumer !== undefined) {

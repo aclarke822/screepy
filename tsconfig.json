@@ -1,7 +1,7 @@
 {
   "extends": "@tsconfig/recommended",
   "include": [
-    "src"
+    "src/"
   ],
   "exclude": [
     "/dist/",
@@ -10,8 +10,12 @@
     "randomSnips"
   ],
   "compilerOptions": {
-    "outDir": "dist",
-    "baseUrl": "src/",
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": "./src",
     "sourceMap": true,
     "experimentalDecorators": true,
     "noImplicitReturns": true,

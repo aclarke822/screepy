@@ -1,21 +1,12 @@
-"use strict";
-
 import del from 'rollup-plugin-delete';
 import nodePolyfills from 'rollup-plugin-polyfill-node';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
 import json from '@rollup/plugin-json';
-//import pkg from './package.json';
 import screepsJson from './screeps.json';
-import screeps from '../rollup-plugin-screeps/dist/es/index';
-
-//import { ScreepsConfig, ScreepsOptions } from 'rollup-plugin-screeps/dist/rollup-plugin-screeps';
-//import { ScreepsConfig, ScreepsOptions } from 'rollup-plugin-screeps/dist/rollup-plugin-screeps';
-
-//import { ScreepsConfig } from 'rollup-plugin-screeps/dist/rollup-plugin-screeps';
-
-//const cfg1 = screepsJson as ScreepsOptions;
+//import screeps from '../rollup-plugin-screepy/dist/es/index.js'
+import screepy from 'rollup-plugin-screepy';
 
 const dest = process.env.DEST;
 const config = screepsJson[dest];
@@ -33,9 +24,6 @@ export default {
     format: "cjs",
     sourcemap: true
   },
-  //pkg: pkg,
-
-  //screepsConfig: screepsJson.main,
 
   plugins: [
     json(),
@@ -44,6 +32,6 @@ export default {
     nodePolyfills(),
     nodeResolve({preferBuiltins: true, rootDir: "src" }),
     typescript({ tsconfig: "./tsconfig.json" }),
-    screeps({ config: config, dryRun: screepsJson == null })
+    screepy({ config: config, dryRun: screepsJson == null })
   ]
 }
