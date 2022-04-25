@@ -1,3 +1,22 @@
+declare global {
+    const STATE_NEW = "NEW";
+    const STATE_SEEKSOURCE = "SEEKSOURCE";
+    const STATE_SEEKHOME = "SEEKHOME";
+    const STATE_RELOCATE = "RELOCATE";
+    const STATE_GATHER = "GATHER";
+    const STATE_UNLOAD = "UNLOAD";
+
+    const INTENT_HARVEST = "HARVEST";
+    const INTENT_UPGRADE = "UPGRADE";
+    const INTENT_UNLOAD = "DEPOSIT";
+
+    const ROLE_HARVESTER = "HARVEST";
+    const ROLE_UPGRADER = "UPGRADE";
+    const ROLE_BUILDER = "DEPOSIT";
+    
+    enum ROLES {STATE_NEW, STATE_SEEKSOURCE, STATE_SEEKHOME, STATE_RELOCATE, STATE_GATHER, STATE_UNLOAD}
+}
+
 interface Commoner extends Creep {
     perform(): void;
     spawn(): void;

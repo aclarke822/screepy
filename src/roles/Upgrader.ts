@@ -17,6 +17,8 @@ interface Upgrader extends Commoner {
 class Upgrader implements Upgrader {
     public static role = "UPGRADER";
     public static bodyParts = [MOVE, WORK, CARRY];
+    public static states = [STATE_NEW, STATE_SEEKSOURCE, STATE_SEEKHOME, STATE_RELOCATE, STATE_GATHER, STATE_UNLOAD];
+    public static intents = [INTENT_UNLOAD, INTENT_HARVEST];
 
     constructor(creep: Creep) {
         this.memory = creep.memory;
