@@ -1,26 +1,28 @@
-type HARVESTER_STATES = typeof STATE_NEW | typeof STATE_SEEKSOURCE | typeof STATE_SEEKHOME | typeof STATE_RELOCATE | typeof STATE_GATHER | typeof STATE_UNLOAD
-type HARVESTER_INTENTS = typeof INTENT_UNLOAD | typeof INTENT_HARVEST
+import Commoner from "roles/Commoner";
 
-interface Harvester extends Creep {
-    perform(): void;
-    memory: CreepMemory;
+interface Harvester extends Commoner {
+    name: string;
+    room: Room;
+    state: Harvester["states"];
+    intent: Harvester["intents"];
+    role: "HARVESTER" | "HARVESTER";
     bodyParts: BodyPartConstant[];
-    states: HARVESTER_STATES;
-    intents: HARVESTER_INTENTS;
+
+    states: typeof STATE_NEW | typeof STATE_SEEKSOURCE | typeof STATE_SEEKHOME | typeof STATE_RELOCATE | typeof STATE_GATHER | typeof STATE_UNLOAD;
+    intents: typeof INTENT_UNLOAD | typeof INTENT_HARVEST;
+    
+    memory: CreepMemory;
+    perform(): void;
 }
 
 class Harvester implements Harvester {
-    constructor() {
-        this.memory = {
-            name: 'harvester',
-            bodyParts: [MOVE, WORK, CARRY],
-            role: 'harvester',
-            state: STATE_NEW,
-            intent: INTENT_HARVEST,
-            room: '',
-            working: false,
-            target: this.findNearestSource().id
-        };
+    public static role = "HARVESTER";
+    public static bodyParts = [MOVE, WORK, CARRY];
+    public static states = [STATE_NEW, STATE_SEEKSOURCE, STATE_SEEKHOME, STATE_RELOCATE, STATE_GATHER, STATE_UNLOAD];
+    public static intents = [INTENT_UNLOAD, INTENT_HARVEST];
+
+    constructor(creep: Creep) {
+        this.memory = creep.memory;
     }
 
     perform(): void {
@@ -42,41 +44,8 @@ class Harvester implements Harvester {
                 this.unload();
                 break;
             default:
-                console.log("Invalid State: " + this.memory.state);
+                console.log(`Invalid State: ${this.memory.state}`);
         }
-
-    }
-
-    relocate() {
-        const target = Game.getObjectById(this.memory.target);
-
-
-        if (target === null) { return; }
-
-        if (this.pos.getRangeTo(target.pos) <= 1) {
-            switch (this.memory.intent) {
-                case "HARVEST":
-                    this.memory.state = "GATHER";
-                    break;
-                case "DEPOSIT":
-                    this.memory.state = "UNLOAD";
-                    break;
-                default:
-                    console.log('Invalid intent: ' + this.memory.intent);
-            }
-        } else {
-            this.moveTo(target.pos, { visualizePathStyle: { stroke: "#ffaa00" } });
-        }
-    }
-
-    seekSource() {
-        this.memory.target = this.findNearestSource().id as Id<Source>;
-        this.memory.state = "RELOCATE";
-    }
-
-    seekHome() {
-        this.memory.target = this.findNearestSpawn().id as Id<StructureSpawn>;
-        this.memory.state = "RELOCATE";
     }
 
     gather() {
@@ -103,23 +72,6 @@ class Harvester implements Harvester {
             this.memory.state = "SEEKSOURCE";
         }
     }
-
-    findNearestSource() {
-        return this.room.find(FIND_SOURCES)[0];
-    }
-
-    findNearestSpawn() {
-        const targets = this.room.find(FIND_STRUCTURES, {
-            filter: (structure) => {
-                return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
-                    structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-            }
-        });
-
-        return targets[0];
-    }
-
-    static states: HARVESTER_STATES;
 }
 
 export default Harvester;

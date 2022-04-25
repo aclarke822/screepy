@@ -1,31 +1,28 @@
-type UPGRADER_STATES = typeof STATE_NEW | typeof STATE_SEEKSOURCE | typeof STATE_SEEKHOME | typeof STATE_RELOCATE | typeof STATE_GATHER | typeof STATE_UNLOAD
-type UPGRADER_INTENTS = typeof INTENT_UPGRADE | typeof INTENT_HARVEST
+import Commoner from "roles/Commoner";
 
-interface Upgrader extends Creep {
-    perform(): void;
-    memory: CreepMemory;
+interface Upgrader extends Commoner {
+    name: string;
+    room: Room;
+    state: Upgrader["states"];
+    intent: Upgrader["intents"];
+    role: "UPGRADER" | "UPGRADER";
     bodyParts: BodyPartConstant[];
-    states: UPGRADER_STATES;
-    intents: UPGRADER_INTENTS;
+
+    states: typeof STATE_NEW | typeof STATE_SEEKSOURCE | typeof STATE_SEEKHOME | typeof STATE_RELOCATE | typeof STATE_GATHER | typeof STATE_UNLOAD;
+    intents: typeof INTENT_UNLOAD | typeof INTENT_HARVEST;
+    
+    memory: CreepMemory;
+    perform(): void;
 }
-
 class Upgrader implements Upgrader {
-    memory: CreepMemory = {
-        name: 'upgrader',
-        bodyParts: [MOVE, WORK, CARRY],
-        role: 'ugprader',
-        state: STATE_NEW,
-        intent: INTENT_HARVEST,
-        room: '',
-        working: false,
-        target: this.findNearestSource().id
-    };
+    public static role = "UPGRADER";
+    public static bodyParts = [MOVE, WORK, CARRY];
 
-    findNearestSource() {
-        return this.room.find(FIND_SOURCES)[0];
+    constructor(creep: Creep) {
+        this.memory = creep.memory;
     }
 
-    perform(): void {
+    public static perform(): void {
         // if (this.upgrading && this.store[RESOURCE_ENERGY] == 0) {
         //     this.memory.upgrading = false;
         //     this.say('🔄 harvest');
