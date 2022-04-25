@@ -11,8 +11,9 @@
     "plugin:@typescript-eslint/recommended"
   ],
   "rules": {
-    "no-console": 0,
-    "no-loops/no-loops": 2
+    "no-console": "off",
+    "no-loops/no-loops": "warn",
+    "semi":"warn"
   },
   "ignorePatterns": [
     "**/dist/**",

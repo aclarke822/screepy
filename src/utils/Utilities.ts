@@ -8,13 +8,13 @@ class MyUtilities {
     };
 
     static initialize = () => {
-        const harvesterBodyParts = [WORK, CARRY, MOVE];
-        const builderBodyParts = [WORK, CARRY, MOVE];
-        const upgraderBodyParts = [WORK, CARRY, MOVE];
+        // const harvesterBodyParts = [WORK, CARRY, MOVE];
+        // const builderBodyParts = [WORK, CARRY, MOVE];
+        // const upgraderBodyParts = [WORK, CARRY, MOVE];
 
-        Memory.creepTypes.push({ name: 'harvester', bodyParts: harvesterBodyParts, role: 'harvester', cost: this.calculateBodyCost(harvesterBodyParts)});
-        Memory.creepTypes.push({ name: 'upgrader', bodyParts: upgraderBodyParts, role: 'upgrader', cost: this.calculateBodyCost(upgraderBodyParts)});
-        Memory.creepTypes.push({ name: 'builder', bodyParts: builderBodyParts, role: 'builder', cost: this.calculateBodyCost(builderBodyParts)});
+        // Memory.creepTypes.push({ name: 'harvester', bodyParts: harvesterBodyParts, role: 'harvester', cost: this.calculateBodyCost(harvesterBodyParts)});
+        // Memory.creepTypes.push({ name: 'upgrader', bodyParts: upgraderBodyParts, role: 'upgrader', cost: this.calculateBodyCost(upgraderBodyParts)});
+        // Memory.creepTypes.push({ name: 'builder', bodyParts: builderBodyParts, role: 'builder', cost: this.calculateBodyCost(builderBodyParts)});
 
         Memory.isInit = true;
     };

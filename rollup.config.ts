@@ -34,4 +34,4 @@ export default {
     typescript({ tsconfig: "./tsconfig.json" }),
     screepy({ config: config, dryRun: screepsJson == null })
   ]
-}
+};

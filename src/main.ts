@@ -3,6 +3,8 @@ import { ErrorMapper } from "utils/ErrorMapper";
 import MyUtilities from "utils/Utilities";
 import Harvester from "roles/harvester";
 import Builder from "roles/builder";
+import Upgrader from "roles/upgrader";
+
 
 declare global {
     const STATE_NEW = "NEW";
@@ -12,11 +14,12 @@ declare global {
     const STATE_GATHER = "GATHER";
     const STATE_UNLOAD = "UNLOAD";
 
-    type CREEP_STATES = Harvester["states"]
+    const INTENT_HARVEST = "HARVEST";
+    const INTENT_UPGRADE = "UPGRADE";
+    const INTENT_UNLOAD = "DEPOSIT";
 
-
-    type EnumType = CREEP_STATES;
-    type EnumKeyType = keyof EnumType;
+    type CREEP_STATES = Harvester["states"] | Builder["states"] | Upgrader["states"];
+    type CREEP_INTENTS = Harvester["intents"] | Builder["intents"] | Upgrader["intents"];
 
     interface Memory {
         uuid: number;
@@ -29,14 +32,16 @@ declare global {
         }];
         isInit: boolean;
     }
+
     interface CreepMemory {
         name: string;
         role: string;
         room: string;
         working: boolean;
         state: CREEP_STATES;
-
+        intent: CREEP_INTENTS;
         bodyParts: BodyPartConstant[];
+        target: Id<Source> | Id<StructureSpawn>
     }
 
 
@@ -52,7 +57,7 @@ declare global {
 export const loop = ErrorMapper.wrapLoop(() => {
     if (!Memory.isInit) {
         MyUtilities.initialize();
-        console.log("Initialized");
+        //console.log("Initialized");
     }
 
     Game.notify(
@@ -79,11 +84,13 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
         switch (creep.memory.role) {
             case 'harvester':
-                //creep.perform();
+                (creep as Harvester).perform();
                 break;
             case 'upgrader':
+                (creep as Upgrader).perform();
                 break;
             case 'builder':
+                (creep as Builder).perform();
                 break;
             default:
                 console.log('No role found');
@@ -92,10 +99,19 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
     });
 
+    Object.keys(Game.spawns).forEach((spawnName: keyof typeof Game.spawns) => {
+        const spawn = Game.spawns[spawnName];
+        spawn.spawnCreep(['work', 'move', 'carry'], 'test1', {memory: {
+            name: 'harvester',
+            bodyParts: [MOVE, WORK, CARRY],
+            role: 'harvester',
+            state: "NEW",
+            intent: "HARVEST",
+            room: '',
+            working: false,
+            target: spawn.room.find(FIND_SOURCES)[0].id as Id<Source>
+        } as CreepMemory});
 
-    // Object.keys(Game.spawns).forEach((spawnName: keyof typeof Game.spawns) => {
-    //     const spawn = Game.spawns[spawnName];
-    //     spawn.spawnCreep(['work', 'move', 'carry'], 'test1');
-    //     const creep: Spawning | null = spawn.spawning;
-    // });
+        //     const creep: Spawning | null = spawn.spawning;
+    });
 });
