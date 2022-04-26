@@ -17,8 +17,8 @@ if (!dest) {
   throw new Error("Invalid upload destination");
 }
 
-export default {
-  input: "src/main.ts",
+export default [
+  {input: "src/main.ts",
   output: {
     file: "dist/main.js",
     format: "cjs",
@@ -28,10 +28,10 @@ export default {
   plugins: [
     json(),
     del({ targets: ["dist"] }),
-    commonjs(),
     nodePolyfills(),
     nodeResolve({preferBuiltins: true, rootDir: "src" }),
+    commonjs(),
     typescript({ tsconfig: "./tsconfig.json" }),
     screepy({ config: config, dryRun: screepsJson == null })
-  ]
-};
+  ]}
+];

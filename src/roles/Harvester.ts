@@ -1,28 +1,18 @@
 import Commoner from "roles/Commoner";
+import { STATE_NEW, STATE_SEEKSOURCE, STATE_GATHER, STATE_RELOCATE, STATE_SEEKHOME, STATE_UNLOAD } from "constants/states";
+import { INTENT_HARVEST, INTENT_DEPOSIT } from "constants/intents";
+import { ROLE_HARVESTER } from "constants/roles";
 
-interface Harvester extends Commoner {
-    name: string;
-    room: Room;
-    state: Harvester["states"];
-    intent: Harvester["intents"];
-    role: "HARVESTER" | "HARVESTER";
-    bodyParts: BodyPartConstant[];
-
-    states: typeof STATE_NEW | typeof STATE_SEEKSOURCE | typeof STATE_SEEKHOME | typeof STATE_RELOCATE | typeof STATE_GATHER | typeof STATE_UNLOAD;
-    intents: typeof INTENT_UNLOAD | typeof INTENT_HARVEST;
-    
-    memory: CreepMemory;
-    perform(): void;
-}
-
-class Harvester implements Harvester {
-    public static role = "HARVESTER";
-    public static bodyParts = [MOVE, WORK, CARRY];
-    public static states = [STATE_NEW, STATE_SEEKSOURCE, STATE_SEEKHOME, STATE_RELOCATE, STATE_GATHER, STATE_UNLOAD];
-    public static intents = [INTENT_UNLOAD, INTENT_HARVEST];
+class Harvester extends Commoner {
+    memory: HarvesterMemory;
+    public static ROLE = ROLE_HARVESTER;
+    public static PARTS = [MOVE, WORK, CARRY];
+    public static STATE_NEW = STATE_NEW;
+    public static INTENT_NEW = INTENT_HARVEST;
 
     constructor(creep: Creep) {
-        this.memory = creep.memory;
+        super(creep);
+        this.memory = creep.memory as HarvesterMemory;
     }
 
     perform(): void {
@@ -48,28 +38,30 @@ class Harvester implements Harvester {
         }
     }
 
-    gather() {
-        const target = Game.getObjectById(this.memory.target) as Source;
-        if (this.store.getFreeCapacity() > 0) {
-            if (this.harvest(target) == ERR_NOT_IN_RANGE) {
-                this.memory.state = "SEEKSOURCE";
+    unload(): void {
+        const target = Game.getObjectById(this.memory.targetId) as Structure<StructureConstant>;
+
+        if (this.store.getUsedCapacity() > 0) {
+            if (this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                this.memory.state = STATE_SEEKHOME;
             }
+
         } else {
-            this.memory.intent = "DEPOSIT";
-            this.memory.state = "SEEKHOME";
+            this.memory.intent = INTENT_HARVEST;
+            this.memory.state = STATE_SEEKSOURCE;
         }
     }
 
-    unload() {
-        const target = Game.getObjectById(this.memory.target) as Structure<StructureConstant>;
-        if (this.store.getUsedCapacity() > 0) {
-            if (this.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                this.memory.state = "SEEKHOME";
-            }
+    gather() {
+        const target = Game.getObjectById(this.memory.targetId) as Source;
 
+        if (this.store.getFreeCapacity() > 0) {
+            if (this.harvest(target) == ERR_NOT_IN_RANGE) {
+                this.memory.state = STATE_SEEKSOURCE;
+            }
         } else {
-            this.memory.intent = "HARVEST";
-            this.memory.state = "SEEKSOURCE";
+            this.memory.intent = INTENT_DEPOSIT;
+            this.memory.state = STATE_SEEKHOME;
         }
     }
 }

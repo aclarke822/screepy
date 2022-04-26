@@ -1,5 +1,5 @@
-import _ from "lodash";
-import SourceMap from 'source-map';
+import * as _ from 'lodash';
+import * as SourceMap from 'source-map';
 
 class ErrorMapper {
   // Cache consumer

@@ -1,49 +1,30 @@
-declare global {
-    const STATE_NEW = "NEW";
-    const STATE_SEEKSOURCE = "SEEKSOURCE";
-    const STATE_SEEKHOME = "SEEKHOME";
-    const STATE_RELOCATE = "RELOCATE";
-    const STATE_GATHER = "GATHER";
-    const STATE_UNLOAD = "UNLOAD";
+import { STATE_GATHER, STATE_RELOCATE, STATE_UNLOAD } from "constants/states";
+import { INTENT_HARVEST, INTENT_DEPOSIT } from "constants/intents";
 
-    const INTENT_HARVEST = "HARVEST";
-    const INTENT_UPGRADE = "UPGRADE";
-    const INTENT_UNLOAD = "DEPOSIT";
+abstract class Commoner extends Creep {
+    abstract memory: CommonerMemory;
+    abstract perform(): void;
 
-    const ROLE_HARVESTER = "HARVEST";
-    const ROLE_UPGRADER = "UPGRADE";
-    const ROLE_BUILDER = "DEPOSIT";
-    
-    enum ROLES {STATE_NEW, STATE_SEEKSOURCE, STATE_SEEKHOME, STATE_RELOCATE, STATE_GATHER, STATE_UNLOAD}
-}
+    constructor(creep: Creep) {
+        super(creep.id);
+    }
 
-interface Commoner extends Creep {
-    perform(): void;
-    spawn(): void;
-    memory: CreepMemory;
-    bodyParts: CreepMemory["bodyParts"];
-    states: CreepMemory["state"];
-    intents: CreepMemory["intent"];
-    roles: CreepMemory["role"];
-}
-
-class Commoner implements Commoner {
-    protected seekHome() {
-        this.memory.target = this.findNearestSpawn().id as Id<StructureSpawn>;
-        this.memory.state = "RELOCATE";
+    protected seekHome(): void {
+        this.memory.targetId = this.findNearestSpawn().id as Id<StructureSpawn>;
+        this.memory.state = STATE_RELOCATE;
     }
 
     protected seekSource(): void {
-        this.memory.target = this.findNearestSource().id as Id<Source>;
-        this.memory.state = "RELOCATE";
+        this.memory.targetId = this.findNearestSource().id as Id<Source>;
+        this.memory.state = STATE_RELOCATE;
     }
 
-    protected findNearestSource() {
-        return this.room.find(FIND_SOURCES)[0];
+    protected findNearestSource(): Source {
+        return this.memory.room.find(FIND_SOURCES)[0];
     }
 
-    protected findNearestSpawn() {
-        const targets = this.room.find(FIND_STRUCTURES, {
+    protected findNearestSpawn(): AnyStructure {
+        const targets = this.memory.room.find(FIND_STRUCTURES, {
             filter: (structure) => {
                 return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
                     structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
@@ -53,18 +34,20 @@ class Commoner implements Commoner {
         return targets[0];
     }
 
-    protected relocate() {
-        const target = Game.getObjectById(this.memory.target);
+    protected relocate(): void {
+        const target = Game.getObjectById(this.memory.targetId);
 
-        if (target === null) { return; }
+        if (target === null) { 
+            this.say("Target is null");
+            return; }
 
         if (this.pos.getRangeTo(target.pos) <= 1) {
             switch (this.memory.intent) {
-                case "HARVEST":
-                    this.memory.state = "GATHER";
+                case INTENT_HARVEST:
+                    this.memory.state = STATE_GATHER;
                     break;
-                case "DEPOSIT":
-                    this.memory.state = "UNLOAD";
+                case INTENT_DEPOSIT:
+                    this.memory.state = STATE_UNLOAD;
                     break;
                 default:
                     console.log('Invalid intent: ' + this.memory.intent);

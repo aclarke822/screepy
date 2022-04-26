@@ -1,32 +1,35 @@
 import Harvester from "roles/Harvester";
 import Builder from "roles/Builder";
 import Upgrader from "roles/Upgrader";
-import _ from 'lodash';
+import * as _ from 'lodash';
 
 class Director {
-    private static incubate = (memory: CreepMemory) => {
-        const newName = `${memory.role}-${Game.time};`;
-        const dryRunValue = Game.spawns['Spawn1'].spawnCreep(memory.bodyParts, newName, { memory, dryRun: true });
+    private static incubate = (memory: CommonerMemory) => {
+        const name = `${memory.role}-${Game.time};`;
+        const spawn = Game.spawns['Spawn1'];
+        const dryRunValue = spawn.spawnCreep(memory.PARTS, name, { memory, dryRun: true });
+        
 
         if (dryRunValue !== 0) {
             console.log(`Spawn not possible: ${dryRunValue}`);
         } else {
-            console.log(`Spawning new ${memory.role}: ${newName}`);
-            Game.spawns['Spawn1'].spawnCreep(memory.bodyParts, newName, { memory, dryRun: false });
+            console.log(`Spawning new ${memory.role}: ${name}`);
+            memory = Object.assign(memory, {room: spawn.room, targetId: spawn.id});
+            spawn.spawnCreep(memory.PARTS, name, {memory, dryRun: false});
         }
     };
 
     public static maintain = () => {
-        const harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == Harvester.role);
-        const upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == Builder.role);
-        const builders = _.filter(Game.creeps, (creep) => creep.memory.role == Upgrader.role);
+        const harvesters = _.filter(Game.creeps, (creep) => creep.memory.role == Harvester.ROLE);
+        const upgraders = _.filter(Game.creeps, (creep) => creep.memory.role == Builder.ROLE);
+        const builders = _.filter(Game.creeps, (creep) => creep.memory.role == Upgrader.ROLE);
 
         if (harvesters.length < 1) {
-            this.incubate({role: Harvester.role, bodyParts: Harvester.bodyParts, state: STATE_NEW, intent: INTENT_HARVEST} as CreepMemory);
+            this.incubate({role: Harvester.ROLE, PARTS: Harvester.PARTS, state: Harvester.STATE_NEW} as HarvesterMemory);
         } else if (upgraders.length < 1) {
-            this.incubate({role: Upgrader.role, bodyParts: Upgrader.bodyParts, state: STATE_NEW, intent: INTENT_HARVEST} as CreepMemory);
+            this.incubate({role: Upgrader.ROLE, PARTS: Upgrader.PARTS, state: Upgrader.STATE_NEW} as UpgraderMemory);
         } else if (builders.length < 1) {
-            this.incubate({role: Builder.role, bodyParts: Builder.bodyParts, state: STATE_NEW, intent: INTENT_HARVEST} as CreepMemory);
+            this.incubate({role: Builder.ROLE, PARTS: Builder.PARTS, state: Builder.STATE_NEW} as BuilderMemory);
         } else {
             console.log("Nothing to spawn");
         }
@@ -45,15 +48,15 @@ class Director {
             const creep = Game.creeps[creepName];
             let performer;
             switch (creep.memory.role) {
-                case Harvester.role:
+                case Harvester.ROLE:
                     performer = new Harvester(creep);
                     performer.perform();
                     break;
-                case Upgrader.role:
+                case Upgrader.ROLE:
                     performer = new Upgrader(creep);
                     performer.perform();
                     break;
-                case Builder.role:
+                case Builder.ROLE:
                     performer = new Builder(creep);
                     performer.perform();
                     break;

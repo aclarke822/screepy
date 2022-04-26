@@ -1,25 +1,25 @@
 {
   "extends": "@tsconfig/recommended",
   "include": [
-    "src/**/*.ts"
+    "src"
   ],
   "exclude": [
-    "/dist/",
-    "node_modules/",
-    "oldjs",
-    "randomSnips"
+    "dist",
+    "node_modules"
   ],
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "baseUrl": "./src",
+    "outDir": "dist",
+    "rootDir": "src",
+    "baseUrl": "src",
     "sourceMap": true,
     "experimentalDecorators": true,
+    "strict": true,
+    "skipLibCheck": true,
     "noImplicitReturns": true,
-    "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": false,
     "allowUnreachableCode": false
   }
 }
