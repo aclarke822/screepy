@@ -4,8 +4,10 @@
   "version": "4.0.0",
   "private": true,
   "type": "module",
+  "module": "main.ts",
+  "main": "index.js",
   "engines": {
-    "node": "17.x"
+    "node": "10.x || 12.x || 17.x"
   },
   "exports": {
     ".": "./dist/index.js",
@@ -19,22 +21,18 @@
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.x",
-    "@rollup/plugin-json": "^4.x",
     "@rollup/plugin-node-resolve": "^13.x",
     "@rollup/plugin-typescript": "^8.x",
-    "@tsconfig/node17": "^1.x",
-    "@tsconfig/recommended": "^1.x",
     "@types/eslint": "^8.x",
-    "@types/lodash": "^4.x",
+    "@types/lodash-es": "^4.x",
     "@types/node": "^17.x",
-    "@types/rollup-plugin-json": "^3.x",
     "@types/screeps": "^3.x",
     "@typescript-eslint/eslint-plugin": "^5.x",
     "@typescript-eslint/parser": "^5.x",
     "eslint": "^8.x",
     "eslint-plugin-no-loops": "^0.x",
     "git-rev-sync": "^3.x",
-    "lodash": "^4.x",
+    "lodash-es": "^4.x",
     "rollup": "^2.x",
     "rollup-plugin-delete": "^2.x",
     "rollup-plugin-polyfill-node": "^0.x",

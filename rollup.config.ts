@@ -3,9 +3,7 @@ import nodePolyfills from 'rollup-plugin-polyfill-node';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
-import json from '@rollup/plugin-json';
 import screepsJson from './screeps.json';
-//import screeps from '../rollup-plugin-screepy/dist/es/index.js'
 import screepy from 'rollup-plugin-screepy';
 
 const dest = process.env.DEST;
@@ -18,20 +16,21 @@ if (!dest) {
 }
 
 export default [
-  {input: "src/main.ts",
-  output: {
-    file: "dist/main.js",
-    format: "cjs",
-    sourcemap: true
-  },
+  {
+    input: "src/main.ts",
+    output: {
+      file: "dist/main.js",
+      format: "cjs",
+      sourcemap: true
+    },
 
-  plugins: [
-    json(),
-    del({ targets: ["dist"] }),
-    nodePolyfills(),
-    nodeResolve({preferBuiltins: true, rootDir: "src" }),
-    commonjs(),
-    typescript({ tsconfig: "./tsconfig.json" }),
-    screepy({ config: config, dryRun: screepsJson == null })
-  ]}
+    plugins: [
+      del({ targets: ["dist"] }),
+      nodePolyfills(),
+      nodeResolve({ rootDir: "src" }),
+      commonjs(),
+      typescript({ tsconfig: "./tsconfig.json" }),
+      screepy({ config: config, dryRun: screepsJson == null })
+    ]
+  }
 ];

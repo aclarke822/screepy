@@ -1,6 +1,8 @@
 {
-  "extends": "@tsconfig/recommended",
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Recommended",
   "include": [
+    "constants",
     "src"
   ],
   "exclude": [
@@ -8,18 +10,21 @@
     "node_modules"
   ],
   "compilerOptions": {
-    "target": "esnext",
+    "target": "es2018",
     "module": "esnext",
     "moduleResolution": "node",
+    "lib": ["es2018"],
     "outDir": "dist",
     "rootDir": "src",
-    "baseUrl": "src",
+    "baseUrl": "src/",
     "sourceMap": true,
     "experimentalDecorators": true,
     "strict": true,
     "skipLibCheck": true,
     "noImplicitReturns": true,
-    "allowSyntheticDefaultImports": false,
-    "allowUnreachableCode": false
+    "allowSyntheticDefaultImports": true,
+    "allowUnreachableCode": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
   }
 }
