@@ -1,5 +1,5 @@
-import Phases from "phases/Phases";
 import { filter } from "lodash-es";
+import Director from "administrators/Director";
 
 export class Auditor {
     static instance: Auditor;
@@ -25,15 +25,14 @@ export class Auditor {
 
     public static auditPhase = () => {
         let phaseIsComplete = true;
-        const workerPlans = Phases.getWorkerPlan();
+        const workerPlans = Director.getWorkerPlan();
 
         workerPlans.forEach((workerPlan, workerRole) => {
             const workerCount = filter(Game.creeps, (creep) => creep.memory.role == workerRole).length;
-            //console.log(`${workerRole}:${workerCount}:${workerPlan.budget}:${phaseIsComplete}:${!(workerCount < workerPlan.budget)}`);
             phaseIsComplete = phaseIsComplete && !(workerCount < workerPlan.budget);
         });
 
-        const buildPlans = Phases.getBuildPlan();
+        const buildPlans = Director.getBuildPlan();
 
         buildPlans.forEach((buildPlan, buildType) => {
             const buildingCount = filter(Game.structures, (structure) => structure.structureType == buildType).length;
@@ -41,6 +40,15 @@ export class Auditor {
         });
         
         return phaseIsComplete;
+    };
+
+    public static calculateBodyCost = (bodyParts: BodyPartDefinition["type"][]) => {
+        let sum = 0;
+        bodyParts.forEach(part => {
+            sum += BODYPART_COST[part].valueOf();
+        });
+
+        return sum;
     };
 }
 

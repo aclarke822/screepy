@@ -1,5 +1,7 @@
 import Director from "administrators/Director";
 import Auditor from "administrators/Auditor";
+import Surveyor from "administrators/Surveyor";
+import Coordinator from "administrators/Coordinator";
 
 export class Orchestrator {
     static instance: Orchestrator;
@@ -8,7 +10,7 @@ export class Orchestrator {
         if (!Memory.isInitialized) {
             console.log("Initialize");
             Memory.isInitialized = true;
-            Memory.rooms[Game.spawns["Spawn1"].room.name] = Game.spawns["Spawn1"].room.memory;
+            Surveyor.surveyRoom(Game.spawns["Spawn1"].room);
             Orchestrator.initiatePhase(0);
         }
     };
@@ -20,7 +22,7 @@ export class Orchestrator {
 
     private static initiatePhase1 = () => {
         console.log("Initiate Phase1");
-        Memory.phase = 1;
+        Memory.phase = 0;
     };
 
     public static phaseMap: Map<number, {initiatePhase: () => void}> = new Map([
@@ -37,25 +39,27 @@ export class Orchestrator {
     };
 
     public static tick2 = () => {
-        Director.maintain();
+        Coordinator.maintain();
     };
 
     public static tick4 = () => {
         Auditor.cleanse();
     };
 
-    // public static tick8 = () => {
-
-    // };
+    public static tick8 = () => {
+        //
+    };
 
     public static tick16 = () => {
         if (Auditor.auditPhase()) { Orchestrator.initiatePhase(Memory.phase + 1); }
     };
 
-    // public static tick32 = () => {
-    // };
+    public static tick32 = () => {
+        //
+    };
 
     public static tick64 = () => {
+        //Surveyor.surveyRoom(Game.spawns["Spawn1"].room);
         console.log(`${Game.time}: 64 ticks`);
     };
 }

@@ -1,4 +1,4 @@
-import Worker from "workers/Worker";
+import Worker from "creeps/workers/Worker";
 
 class Builder extends Worker {
     memory: WorkerMemory;
@@ -28,6 +28,9 @@ class Builder extends Worker {
             case Worker.CONSTANTS.STATE_SEEKSOURCE:
                 this.seekSource();
                 break;
+            case Worker.CONSTANTS.STATE_SEEKFULLSTORE:
+                this.seekSource();
+                break;
             case Worker.CONSTANTS.STATE_SEEKFRAME:
                 this.seekFrame();
                 break;
@@ -35,7 +38,7 @@ class Builder extends Worker {
                 this.relocate();
                 break;
             case Worker.CONSTANTS.STATE_GATHER:
-                this.gather();
+                this.gather(Worker.CONSTANTS.INTENT_BUILD, Worker.CONSTANTS.STATE_SEEKFRAME, Worker.CONSTANTS.STATE_SEEKSOURCE);
                 break;
             case Worker.CONSTANTS.STATE_CONSTRUCT:
                 this.construct();

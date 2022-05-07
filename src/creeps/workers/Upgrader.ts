@@ -1,4 +1,4 @@
-import Worker from "workers/Worker";
+import Worker from "creeps/workers/Worker";
 
 class Upgrader extends Worker {
     memory: WorkerMemory;
@@ -35,7 +35,7 @@ class Upgrader extends Worker {
                 this.relocate();
                 break;
             case Worker.CONSTANTS.STATE_GATHER:
-                this.gather();
+                this.gather(Worker.CONSTANTS.INTENT_UPGRADE, Worker.CONSTANTS.STATE_SEEKCONTROLLER, Worker.CONSTANTS.STATE_SEEKSOURCE);
                 break;
             case Worker.CONSTANTS.STATE_PROMOTE:
                 this.promote();

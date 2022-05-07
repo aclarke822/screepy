@@ -1,13 +1,14 @@
-import { clone, cloneDeep } from "lodash-es";
-import util from 'util';
-
 export const WORKER_CONSTANTS = {
     INTENT_HARVEST: "HARVEST" as INTENT_HARVEST,
     INTENT_UPGRADE: "UPGRADE" as INTENT_UPGRADE,
     INTENT_DEPOSIT: "DEPOSIT" as INTENT_DEPOSIT,
     INTENT_BUILD: "BUILD" as INTENT_BUILD,
+    INTENT_WITHDRAW: "WITHDRAW" as INTENT_WITHDRAW,
+    INTENT_TOIL: "TOIL" as INTENT_TOIL,
+    INTENT_FETCH: "FETCH" as INTENT_FETCH,
 
     STATE_NEW: "NEW" as STATE_NEW,
+    STATE_DUMP: "DUMP" as STATE_DUMP,
     STATE_SEEKSOURCE: "SEEKSOURCE" as STATE_SEEKSOURCE,
     STATE_SEEKHOME: "SEEKHOME" as STATE_SEEKHOME,
     STATE_RELOCATE: "RELOCATE" as STATE_RELOCATE,
@@ -18,15 +19,21 @@ export const WORKER_CONSTANTS = {
     STATE_SEEKCONTROLLER: "SEEKCONTROLLER" as STATE_SEEKCONTROLLER,
     STATE_PROMOTE: "PROMOTE" as STATE_PROMOTE,
     STATE_SEEKFREESTORE: "SEEKFREESTORE" as STATE_SEEKFREESTORE,
+    STATE_SEEKFULLSTORE: "SEEKFULLSTORE" as STATE_SEEKFULLSTORE,
+    STATE_SEEKTOILER: "SEEKTOILER" as STATE_SEEKTOILER,
+    STATE_SEEKDROPPEDENERGY: "SEEKDROPPEDENERGY" as STATE_SEEKDROPPEDENERGY,
 
     ROLE_HARVESTER: "HARVESTER" as ROLE_HARVESTER,
     ROLE_UPGRADER: "UPGRADER" as ROLE_UPGRADER,
-    ROLE_BUILDER: "BUILDER" as ROLE_BUILDER
+    ROLE_BUILDER: "BUILDER" as ROLE_BUILDER,
+    ROLE_TOILER: "TOILER" as ROLE_TOILER,
+    ROLE_HAULER: "HAULER" as ROLE_HAULER
 };
 
 export abstract class Worker extends Creep {
     abstract memory: WorkerMemory;
     abstract perform(): void;
+    // abstract arrivedToTarget(): void;
     static readonly BIRTH: number;
     static readonly CONSTANTS = WORKER_CONSTANTS;
 
@@ -40,7 +47,7 @@ export abstract class Worker extends Creep {
     }
 
     protected seekSource(): void {
-        this.memory.targetId = this.findLeastActiveSource().id as Id<Source>;
+        this.memory.targetId = this.findLeastActiveSource().id;
         this.memory.state = WORKER_CONSTANTS.STATE_RELOCATE;
     }
 
@@ -55,36 +62,38 @@ export abstract class Worker extends Creep {
 
     protected findLeastActiveSource(): Source {
         const creeps = Memory.creeps;
-        const sources = this.room.find(FIND_SOURCES_ACTIVE);
+        const room = Memory.rooms[this.room.name];
+        const sources = room.sources; //find(FIND_SOURCES_ACTIVE);
 
         let leastActiveSource: {
-            source: Source | undefined,
-            sourceTargets: number
+            sourceId: string | undefined,
+            targets: number
         };
 
-        leastActiveSource = { source: undefined, sourceTargets: 99999 };
+        leastActiveSource = { sourceId: undefined, targets: 99999 };
 
-        sources.forEach((source) => {
+        Object.keys(sources).forEach((sourceId) => {
             let targets = 0;
+            
+            if (sourceId === room.avoidSourceId) { return; }
 
             Object.keys(creeps).forEach((creepName) => {
                 const creep = creeps[creepName];
 
-                if (creep.targetId === source.id) { targets += 1; }
+                if (creep.targetId === sourceId) { targets += 1; }
             });
-            console.log(`${source.id}:::leastActiveSource.sourceTargets-${leastActiveSource.sourceTargets}:::targets-${targets}`);
-
-            if (leastActiveSource.sourceTargets > targets) { leastActiveSource = { source: source, sourceTargets: targets }; }
+            //console.log(`${sourceId}:::leastActiveSource.sourceTargets-${leastActiveSource.targets}:::targets-${targets}`);
+            sources[sourceId as Id<Source>].targets = targets;
+            if (leastActiveSource.targets > targets) { leastActiveSource = { sourceId: sourceId, targets: targets }; }
         });
 
-        const source = leastActiveSource.source;
+        let sourceId = leastActiveSource.sourceId as Id<_HasId>;
 
-        if (source !== undefined && source !== null) {
-            if (source.id === "42f183d02d348e16b6e6e4d5") { return sources[0];}
-            return source;
-        } else {
-            return sources[0];
+        if (sourceId === undefined || sourceId === null || sourceId === room.avoidSourceId) {
+            sourceId = room.defaultSourceId;
         }
+
+        return this.getTargetById(sourceId) as Source;
     }
 
     protected findNearestSpawn(): AnyStructure {
@@ -110,7 +119,26 @@ export abstract class Worker extends Creep {
         } else {
             return this.findNearestSpawn();
         }
+    }
 
+    seekFreeStore() {
+        this.memory.targetId = this.findNearestFreeStore().id as Id<StructureSpawn>;
+        this.memory.state = Worker.CONSTANTS.STATE_RELOCATE;
+    }
+
+    protected findNearestFullStore(): AnyStructure | Source {
+        const targets = this.room.find(FIND_STRUCTURES, {
+            filter: (structure) => {
+                return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
+                    structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0;
+            }
+        });
+
+        if (targets.length > 0) {
+            return targets[0];
+        } else {
+            return this.findLeastActiveSource();
+        }
     }
 
     protected relocate(): void {
@@ -129,6 +157,9 @@ export abstract class Worker extends Creep {
                     break;
                 case WORKER_CONSTANTS.INTENT_UPGRADE:
                     this.memory.state = WORKER_CONSTANTS.STATE_PROMOTE;
+                    break;
+                case WORKER_CONSTANTS.INTENT_TOIL:
+                    this.memory.state = WORKER_CONSTANTS.STATE_GATHER;
                     break;
                 default:
                     throw new Error(`${this.name} - Invalid Intent: ${this.memory.intent}`);
@@ -157,6 +188,9 @@ export abstract class Worker extends Creep {
                 case WORKER_CONSTANTS.INTENT_UPGRADE:
                     this.memory.state = WORKER_CONSTANTS.STATE_SEEKCONTROLLER;
                     break;
+                case WORKER_CONSTANTS.INTENT_WITHDRAW:
+                    this.memory.state = WORKER_CONSTANTS.STATE_SEEKFULLSTORE;
+                    break;
                 default:
                     throw new Error(`${this.name} - Invalid Intent: ${this.memory.intent}`);
             }
@@ -164,30 +198,30 @@ export abstract class Worker extends Creep {
         }
     }
 
-    protected gather(): void {
+    //abstract targetAcquired: void
+
+    protected gather(intentChange: WORKER_INTENTS, stateChange: WORKER_STATES, failState: WORKER_STATES): void {
         const target = this.getTargetById(this.memory.targetId) as Source;
 
         if (this.store.getFreeCapacity() > 0) {
-            if (this.harvest(target) !== OK) {
-                this.memory.state = WORKER_CONSTANTS.STATE_SEEKSOURCE;
+            if (this.harvest(target) !== OK) { this.memory.state = failState; }
+        } else {
+            this.memory.intent = intentChange;
+            this.memory.state = stateChange;
+        }
+    }
+
+    protected unload(): void {
+        const target = this.getTargetById(this.memory.targetId) as Structure<StructureConstant>;
+        const returnCode = this.transfer(target, RESOURCE_ENERGY);
+
+        if (this.store.getUsedCapacity() > 0) {
+            if (returnCode !== OK) {
+                this.memory.state = Worker.CONSTANTS.STATE_SEEKFREESTORE;
             }
         } else {
-            switch (this.memory.role) {
-                case WORKER_CONSTANTS.ROLE_HARVESTER:
-                    this.memory.intent = WORKER_CONSTANTS.INTENT_DEPOSIT;
-                    this.memory.state = WORKER_CONSTANTS.STATE_SEEKHOME;
-                    break;
-                case WORKER_CONSTANTS.ROLE_BUILDER:
-                    this.memory.intent = WORKER_CONSTANTS.INTENT_BUILD;
-                    this.memory.state = WORKER_CONSTANTS.STATE_SEEKFRAME;
-                    break;
-                case WORKER_CONSTANTS.ROLE_UPGRADER:
-                    this.memory.intent = WORKER_CONSTANTS.INTENT_UPGRADE;
-                    this.memory.state = WORKER_CONSTANTS.STATE_SEEKCONTROLLER;
-                    break;
-                default:
-                    throw new Error(`${this.name} - Invalid role: ${this.memory.role}`);
-            }
+            this.memory.intent = Worker.CONSTANTS.INTENT_HARVEST;
+            this.memory.state = Worker.CONSTANTS.STATE_SEEKSOURCE;
         }
     }
 }

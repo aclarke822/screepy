@@ -1,4 +1,4 @@
-import Worker from "workers/Worker";
+import Worker from "creeps/workers/Worker";
 
 export class Harvester extends Worker {
     memory: WorkerMemory;
@@ -38,7 +38,7 @@ export class Harvester extends Worker {
                 this.relocate();
                 break;
             case Worker.CONSTANTS.STATE_GATHER:
-                this.gather();
+                this.gather(Worker.CONSTANTS.INTENT_DEPOSIT, Worker.CONSTANTS.STATE_SEEKHOME, Worker.CONSTANTS.STATE_SEEKSOURCE);
                 break;
             case Worker.CONSTANTS.STATE_UNLOAD:
                 this.unload();
@@ -47,34 +47,6 @@ export class Harvester extends Worker {
                 throw new Error(`${this.name} - Invalid State: ${this.memory.state}`);
         }
     }
-
-    seekFreeStore() {
-        this.memory.targetId = this.findNearestFreeStore().id as Id<StructureSpawn>;
-        this.memory.state = Worker.CONSTANTS.STATE_RELOCATE;
-    }
-
-    protected unload(): void {
-        const target = this.getTargetById(this.memory.targetId) as Structure<StructureConstant>;
-        const returnCode = this.transfer(target, RESOURCE_ENERGY);
-
-        if (this.store.getUsedCapacity() > 0) {
-            if (returnCode !== OK) {
-                this.memory.state = Worker.CONSTANTS.STATE_SEEKFREESTORE;
-            }
-        } else {
-            this.memory.intent = Worker.CONSTANTS.INTENT_HARVEST;
-            this.memory.state = Worker.CONSTANTS.STATE_SEEKSOURCE;
-        }
-    }
-}
-
-export class Harvester2 extends Harvester {
-    static readonly HARVESTER_PROPS: WORKER_PROPS = {
-        PARTS: [MOVE, MOVE, WORK, WORK, CARRY, CARRY],
-        STATE_NEW: Worker.CONSTANTS.STATE_NEW,
-        INTENT_NEW: Worker.CONSTANTS.INTENT_HARVEST,
-        NEW(creep: Creep) { return new Harvester2(creep); },
-    };
 }
 
 export default Harvester;
